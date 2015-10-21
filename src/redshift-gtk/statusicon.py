@@ -490,18 +490,8 @@ class RedshiftStatusIcon(object):
         return False
 
 
-def sigterm_handler(data=None):
-    sys.exit(0)
-
-
 def run():
     utils.setproctitle('redshift-gtk')
-
-    # Install TERM signal handler
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM,
-                         sigterm_handler, None)
-    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT,
-                         sigterm_handler, None)
 
     # Internationalisation
     gettext.bindtextdomain('redshift', defs.LOCALEDIR)
@@ -509,6 +499,13 @@ def run():
 
     # Create redshift child process controller
     c = RedshiftController(sys.argv[1:])
+
+    # Install signal handlers
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM,
+                         Gtk.main_quit, None)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT,
+                         Gtk.main_quit, None)
+
     try:
         # Create status icon
         s = RedshiftStatusIcon(c)
